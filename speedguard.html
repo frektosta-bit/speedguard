@@ -20,6 +20,17 @@
     --muted: #555570;
   }
 
+  body.night {
+    --ok: #00b37a;
+    --warn: #cc8800;
+    --danger: #cc1133;
+    --bg: #050508;
+    --panel: #0a0a10;
+    --border: #141420;
+    --text: #a0a0c0;
+    --muted: #333348;
+  }
+
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
   html, body {
@@ -28,13 +39,14 @@
     background:var(--bg);
     color:var(--text);
     font-family:'Inter',sans-serif;
+    transition: background 1s, color 1s;
   }
 
   body::before {
     content:''; position:fixed; inset:0;
     background-image:
-      linear-gradient(rgba(0,229,160,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,160,0.025) 1px, transparent 1px);
+      linear-gradient(rgba(0,229,160,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,0.02) 1px, transparent 1px);
     background-size:40px 40px;
     z-index:0; animation:gridMove 20s linear infinite;
   }
@@ -43,26 +55,36 @@
   .app {
     position:relative; z-index:1;
     height:100%; display:flex; flex-direction:column;
-    padding:8px 12px; gap:6px;
+    padding:7px 11px; gap:5px;
     max-width:480px; margin:0 auto;
   }
 
   /* HEADER */
   .header { display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
   .logo {
-    font-family:'Orbitron',monospace; font-size:14px; font-weight:900;
-    letter-spacing:3px; color:var(--ok); text-shadow:0 0 16px rgba(0,229,160,0.5);
+    font-family:'Orbitron',monospace; font-size:13px; font-weight:900;
+    letter-spacing:3px; color:var(--ok); text-shadow:0 0 16px rgba(0,229,160,0.4);
   }
-  .header-right { display:flex; align-items:center; gap:8px; }
-  .clock {
-    font-family:'Orbitron',monospace; font-size:13px; font-weight:700;
-    color:var(--text); letter-spacing:1px;
-  }
+  .header-right { display:flex; align-items:center; gap:7px; }
+  .clock { font-family:'Orbitron',monospace; font-size:12px; font-weight:700; color:var(--text); letter-spacing:1px; }
+  .battery-icon { font-size:11px; color:var(--muted); }
   .status-dot { width:8px; height:8px; border-radius:50%; background:var(--muted); transition:all 0.4s; }
   .status-dot.active { background:var(--ok); box-shadow:0 0 8px var(--ok); animation:pulse 2s infinite; }
   .status-dot.danger { background:var(--danger); box-shadow:0 0 8px var(--danger); animation:pulseFast 0.5s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
   @keyframes pulseFast { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* STREET NAME */
+  .street-bar {
+    flex-shrink:0;
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:5px 10px;
+    display:flex; align-items:center; gap:7px;
+    font-size:10px; color:var(--muted);
+    overflow:hidden;
+  }
+  .street-icon { font-size:13px; flex-shrink:0; }
+  .street-name { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); font-size:10px; font-weight:500; }
 
   /* ALERT */
   .alert-banner {
@@ -74,155 +96,163 @@
     max-height:0; overflow:hidden; opacity:0;
     transition:max-height 0.3s, opacity 0.3s, padding 0.3s;
   }
-  .alert-banner.visible { max-height:36px; opacity:1; padding:6px 12px; animation:alertPulse 0.8s infinite; }
+  .alert-banner.visible { max-height:34px; opacity:1; padding:5px 12px; animation:alertPulse 0.8s infinite; }
   @keyframes alertPulse { 0%,100%{background:rgba(255,45,85,0.15)} 50%{background:rgba(255,45,85,0.3)} }
 
   /* SPEED CARD */
   .speed-card {
     flex-shrink:0;
     background:var(--panel); border:1px solid var(--border);
-    border-radius:20px; padding:12px 12px 8px; text-align:center;
+    border-radius:18px; padding:10px 12px 8px; text-align:center;
     position:relative; overflow:hidden;
     transition:border-color 0.3s, box-shadow 0.3s;
   }
   .speed-card::before {
     content:''; position:absolute; inset:0;
-    background:radial-gradient(ellipse at 50% 0%, rgba(0,229,160,0.06) 0%, transparent 70%);
+    background:radial-gradient(ellipse at 50% 0%, rgba(0,229,160,0.05) 0%, transparent 70%);
     pointer-events:none; transition:background 0.3s;
   }
-  .speed-card.over::before { background:radial-gradient(ellipse at 50% 0%, rgba(255,45,85,0.12) 0%, transparent 70%); }
-  .speed-card.over { border-color:var(--danger); box-shadow:0 0 30px rgba(255,45,85,0.15); }
+  .speed-card.over::before { background:radial-gradient(ellipse at 50% 0%, rgba(255,45,85,0.1) 0%, transparent 70%); }
+  .speed-card.over { border-color:var(--danger); box-shadow:0 0 28px rgba(255,45,85,0.12); }
   .speed-label { font-size:8px; letter-spacing:4px; text-transform:uppercase; color:var(--muted); }
   .speed-value {
-    font-family:'Orbitron',monospace; font-size:72px; font-weight:900;
-    line-height:1; color:var(--ok); text-shadow:0 0 30px rgba(0,229,160,0.4);
+    font-family:'Orbitron',monospace; font-size:68px; font-weight:900;
+    line-height:1; color:var(--ok); text-shadow:0 0 28px rgba(0,229,160,0.35);
     transition:color 0.3s, text-shadow 0.3s; letter-spacing:-2px;
   }
-  .speed-value.over { color:var(--danger); text-shadow:0 0 30px rgba(255,45,85,0.5); }
-  .speed-unit { font-family:'Orbitron',monospace; font-size:10px; color:var(--muted); letter-spacing:2px; }
-  .accuracy-bar { height:2px; background:var(--border); border-radius:2px; margin-top:6px; overflow:hidden; }
+  .speed-value.over { color:var(--danger); text-shadow:0 0 28px rgba(255,45,85,0.4); }
+  .speed-value.warn105 { color:var(--warn); text-shadow:0 0 28px rgba(255,179,0,0.4); }
+  .speed-unit { font-family:'Orbitron',monospace; font-size:9px; color:var(--muted); letter-spacing:2px; }
+  .accuracy-bar { height:2px; background:var(--border); border-radius:2px; margin-top:5px; overflow:hidden; }
   .accuracy-fill { height:100%; background:var(--ok); border-radius:2px; transition:width 0.5s; width:0%; }
 
   /* INFO ROW */
-  .info-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; flex-shrink:0; }
+  .info-row { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:5px; flex-shrink:0; }
   .info-card {
     background:var(--panel); border:1px solid var(--border);
-    border-radius:12px; padding:7px 6px; text-align:center;
+    border-radius:10px; padding:6px 4px; text-align:center;
   }
-  .info-card-label { font-size:7px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
-  .info-card-value { font-family:'Orbitron',monospace; font-size:16px; font-weight:700; color:var(--text); line-height:1.1; }
-  .info-card-unit { font-size:7px; color:var(--muted); margin-top:1px; letter-spacing:1px; }
+  .info-card-label { font-size:6px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
+  .info-card-value { font-family:'Orbitron',monospace; font-size:14px; font-weight:700; color:var(--text); line-height:1.1; }
+  .info-card-unit { font-size:6px; color:var(--muted); margin-top:1px; letter-spacing:1px; }
   .limit-badge {
-    display:inline-block; width:34px; height:34px;
+    display:inline-block; width:30px; height:30px;
     border-radius:50%; border:2px solid var(--danger);
-    line-height:30px; font-family:'Orbitron',monospace;
-    font-size:12px; font-weight:900; color:var(--text);
+    line-height:26px; font-family:'Orbitron',monospace;
+    font-size:10px; font-weight:900; color:var(--text);
   }
 
-  /* WEATHER + TRAFFIC ROW */
-  .wt-row { display:grid; grid-template-columns:1fr 1fr; gap:6px; flex-shrink:0; }
+  /* WEATHER + TRAFFIC */
+  .wt-row { display:grid; grid-template-columns:1fr 1fr; gap:5px; flex-shrink:0; }
   .wt-card {
     background:var(--panel); border:1px solid var(--border);
-    border-radius:12px; padding:8px 10px;
-    display:flex; align-items:center; gap:8px;
+    border-radius:10px; padding:6px 8px;
+    display:flex; align-items:center; gap:6px;
   }
-  .wt-icon { font-size:22px; flex-shrink:0; }
+  .wt-icon { font-size:18px; flex-shrink:0; }
   .wt-info { flex:1; min-width:0; }
-  .wt-label { font-size:7px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
-  .wt-value { font-family:'Orbitron',monospace; font-size:13px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .wt-sub { font-size:8px; color:var(--muted); margin-top:1px; }
+  .wt-label { font-size:6px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:1px; }
+  .wt-value { font-family:'Orbitron',monospace; font-size:12px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .wt-sub { font-size:7px; color:var(--muted); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-  /* COMPASS */
-  .compass-row { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  /* COMPASS + OSM */
+  .compass-row { display:flex; gap:5px; flex-shrink:0; }
   .compass-card {
     flex:1; background:var(--panel); border:1px solid var(--border);
-    border-radius:12px; padding:8px 12px;
-    display:flex; align-items:center; gap:10px;
+    border-radius:10px; padding:6px 8px;
+    display:flex; align-items:center; gap:8px;
   }
   .compass-circle {
-    width:36px; height:36px; border-radius:50%;
+    width:30px; height:30px; border-radius:50%;
     border:2px solid var(--border); position:relative; flex-shrink:0;
     background:var(--bg);
   }
   .compass-needle {
     position:absolute; top:50%; left:50%;
-    width:2px; height:14px; background:var(--danger);
+    width:2px; height:11px; background:var(--danger);
     transform-origin:bottom center;
     transform:translateX(-50%) translateY(-100%) rotate(0deg);
-    border-radius:2px 2px 0 0;
-    transition:transform 0.5s ease;
+    border-radius:2px 2px 0 0; transition:transform 0.5s ease;
   }
   .compass-needle::after {
-    content:''; position:absolute; bottom:-6px; left:50%;
+    content:''; position:absolute; bottom:-5px; left:50%;
     transform:translateX(-50%);
-    width:2px; height:6px; background:var(--ok);
+    width:2px; height:5px; background:var(--ok);
     border-radius:0 0 2px 2px;
   }
   .compass-info { flex:1; }
-  .compass-label { font-size:7px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
-  .compass-value { font-family:'Orbitron',monospace; font-size:16px; font-weight:700; color:var(--text); }
-  .compass-dir { font-size:9px; color:var(--ok); margin-top:1px; }
+  .compass-label { font-size:6px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:1px; }
+  .compass-value { font-family:'Orbitron',monospace; font-size:14px; font-weight:700; color:var(--text); }
+  .compass-dir { font-size:8px; color:var(--ok); margin-top:1px; }
 
   .osm-card {
     flex:1; background:var(--panel); border:1px solid var(--border);
-    border-radius:12px; padding:8px 10px;
-    display:flex; align-items:center; gap:6px;
+    border-radius:10px; padding:6px 8px;
+    display:flex; align-items:center; gap:5px;
   }
-  .osm-dot { width:6px; height:6px; border-radius:50%; background:var(--muted); flex-shrink:0; }
+  .osm-dot { width:5px; height:5px; border-radius:50%; background:var(--muted); flex-shrink:0; }
   .osm-dot.ok { background:var(--ok); }
   .osm-dot.loading { background:var(--warn); animation:pulse 1s infinite; }
-  .osm-text { font-size:9px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .osm-text { font-size:8px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* TRIP STATS */
+  .trip-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px; flex-shrink:0; }
+  .trip-card {
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:5px 4px; text-align:center;
+  }
+  .trip-label { font-size:6px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
+  .trip-value { font-family:'Orbitron',monospace; font-size:12px; font-weight:700; color:var(--warn); }
+  .trip-unit { font-size:6px; color:var(--muted); }
 
   /* LIMIT CARD */
   .limit-card {
     background:var(--panel); border:1px solid var(--border);
-    border-radius:12px; padding:7px 10px; flex-shrink:0;
+    border-radius:10px; padding:6px 8px; flex-shrink:0;
   }
-  .limit-title { font-size:7px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:5px; }
+  .limit-title { font-size:6px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
   .limit-buttons { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
   .limit-btn {
-    background:var(--bg); border:1px solid var(--border); border-radius:7px;
-    padding:6px 2px; font-family:'Orbitron',monospace; font-size:11px;
+    background:var(--bg); border:1px solid var(--border); border-radius:6px;
+    padding:5px 2px; font-family:'Orbitron',monospace; font-size:11px;
     font-weight:700; color:var(--muted); cursor:pointer; transition:all 0.2s; text-align:center;
   }
   .limit-btn.active { background:rgba(0,229,160,0.1); border-color:var(--ok); color:var(--ok); }
-  .limit-btn.manual-btn { font-size:8px; }
-  .manual-input-row { display:none; gap:5px; margin-top:5px; }
+  .limit-btn.manual-btn { font-size:7px; }
+  .manual-input-row { display:none; gap:4px; margin-top:4px; }
   .manual-input-row.visible { display:flex; }
   .manual-input {
     flex:1; background:var(--bg); border:1px solid var(--border);
-    border-radius:7px; padding:6px 8px; font-family:'Orbitron',monospace;
-    font-size:15px; font-weight:700; color:var(--text); text-align:center; outline:none;
+    border-radius:6px; padding:5px 8px; font-family:'Orbitron',monospace;
+    font-size:14px; font-weight:700; color:var(--text); text-align:center; outline:none;
   }
   .manual-input:focus { border-color:var(--ok); }
   .manual-confirm {
     background:rgba(0,229,160,0.15); border:1px solid var(--ok);
-    border-radius:7px; padding:6px 12px; font-family:'Orbitron',monospace;
-    font-size:10px; font-weight:700; color:var(--ok); cursor:pointer;
+    border-radius:6px; padding:5px 10px; font-family:'Orbitron',monospace;
+    font-size:9px; font-weight:700; color:var(--ok); cursor:pointer;
   }
 
   /* START BUTTON */
   .start-btn {
     flex-shrink:0;
     background:linear-gradient(135deg, rgba(0,229,160,0.15), rgba(0,229,160,0.05));
-    border:1px solid var(--ok); border-radius:12px; padding:13px;
+    border:1px solid var(--ok); border-radius:12px; padding:12px;
     font-family:'Orbitron',monospace; font-size:13px; font-weight:700;
     letter-spacing:3px; color:var(--ok); cursor:pointer; text-align:center;
-    box-shadow:0 0 20px rgba(0,229,160,0.1); transition:all 0.2s;
+    box-shadow:0 0 18px rgba(0,229,160,0.1); transition:all 0.2s;
   }
   .start-btn.stop {
     background:linear-gradient(135deg, rgba(255,45,85,0.15), rgba(255,45,85,0.05));
     border-color:var(--danger); color:var(--danger);
-    box-shadow:0 0 20px rgba(255,45,85,0.1);
+    box-shadow:0 0 18px rgba(255,45,85,0.1);
   }
 
   /* FOOTER */
   .footer {
     flex-shrink:0; text-align:center;
-    font-size:8px; color:var(--muted); letter-spacing:1px;
-    padding-bottom:2px;
+    font-size:7px; color:var(--muted); letter-spacing:1px; padding-bottom:1px;
   }
-  .footer span { color:#3a3a55; }
 </style>
 </head>
 <body>
@@ -231,9 +261,15 @@
   <div class="header">
     <div class="logo">SPEEDGUARD</div>
     <div class="header-right">
+      <span class="battery-icon" id="batteryDisplay">🔋</span>
       <div class="clock" id="clock">00:00:00</div>
       <div class="status-dot" id="statusDot"></div>
     </div>
+  </div>
+
+  <div class="street-bar">
+    <span class="street-icon">📍</span>
+    <span class="street-name" id="streetName">En attente GPS...</span>
   </div>
 
   <div class="alert-banner" id="alertBanner">⚠ VITESSE DÉPASSÉE</div>
@@ -261,6 +297,11 @@
       <div class="info-card-value" id="maxSpeed" style="color:var(--warn)">0</div>
       <div class="info-card-unit">km/h</div>
     </div>
+    <div class="info-card">
+      <div class="info-card-label">MOY</div>
+      <div class="info-card-value" id="avgSpeed" style="color:var(--ok)">0</div>
+      <div class="info-card-unit">km/h</div>
+    </div>
   </div>
 
   <div class="wt-row">
@@ -269,7 +310,7 @@
       <div class="wt-info">
         <div class="wt-label">MÉTÉO</div>
         <div class="wt-value" id="weatherTemp">-- °C</div>
-        <div class="wt-sub" id="weatherDesc">En attente GPS</div>
+        <div class="wt-sub" id="weatherDesc">Démarrer GPS</div>
       </div>
     </div>
     <div class="wt-card">
@@ -277,7 +318,7 @@
       <div class="wt-info">
         <div class="wt-label">TRAFIC</div>
         <div class="wt-value" id="trafficStatus">--</div>
-        <div class="wt-sub" id="trafficSub">En attente GPS</div>
+        <div class="wt-sub" id="trafficSub">Démarrer GPS</div>
       </div>
     </div>
   </div>
@@ -296,6 +337,24 @@
     <div class="osm-card">
       <div class="osm-dot" id="osmDot"></div>
       <span class="osm-text" id="osmStatus">OSM inactif</span>
+    </div>
+  </div>
+
+  <div class="trip-row">
+    <div class="trip-card">
+      <div class="trip-label">DISTANCE</div>
+      <div class="trip-value" id="tripDist">0.0</div>
+      <div class="trip-unit">km</div>
+    </div>
+    <div class="trip-card">
+      <div class="trip-label">DURÉE</div>
+      <div class="trip-value" id="tripTime">0:00</div>
+      <div class="trip-unit">min</div>
+    </div>
+    <div class="trip-card">
+      <div class="trip-label">ALERTES</div>
+      <div class="trip-value" id="tripAlerts" style="color:var(--danger)">0</div>
+      <div class="trip-unit">fois</div>
     </div>
   </div>
 
@@ -321,40 +380,87 @@
 
   <div class="footer">
     Développé par <span style="color:var(--ok);font-weight:700;">1war</span>
-    &nbsp;|&nbsp; © 2026 SpeedGuard <span>— Tous droits réservés</span>
+    &nbsp;|&nbsp; © 2026 SpeedGuard — Tous droits réservés
   </div>
 
 </div>
 
 <script>
 // ============================================================
-// CONFIG — Remplace YOUR_KEY par ta clé OpenWeatherMap
+// CONFIG
 // ============================================================
 const WEATHER_API_KEY = '03e7db01581282339015f0ff274a6e50';
-const TOMTOM_API_KEY  = 'FREE'; // TomTom gratuit sans clé pour données basiques
 
 // ============================================================
 // STATE
 // ============================================================
-let tracking = false, watchId = null;
+let tracking = false, watchId = null, wakeLock = null;
 let manualLimit = 50, osmLimit = null, currentSpeed = 0, maxSpeed = 0;
 let audioCtx = null, beepInterval = null;
-let lastOsmFetch = 0, lastWeatherFetch = 0, lastTrafficFetch = 0;
-let lastLat = null, lastLon = null, osmMode = false;
-let currentHeading = null;
+let lastOsmFetch = 0, lastWeatherFetch = 0, lastTrafficFetch = 0, lastStreetFetch = 0;
+let lastLat = null, lastLon = null, prevLat = null, prevLon = null;
+let osmMode = false, currentHeading = null;
+let tripStart = null, tripDist = 0, tripAlertCount = 0, speedSamples = [];
+let lastVoiceAlert = 0, lastBeepAlert = 0;
+let isOver = false;
 
 // ============================================================
 // CLOCK
 // ============================================================
 function updateClock() {
   const now = new Date();
-  const h = String(now.getHours()).padStart(2,'0');
-  const m = String(now.getMinutes()).padStart(2,'0');
-  const s = String(now.getSeconds()).padStart(2,'0');
-  document.getElementById('clock').textContent = h+':'+m+':'+s;
+  document.getElementById('clock').textContent =
+    String(now.getHours()).padStart(2,'0')+':'+
+    String(now.getMinutes()).padStart(2,'0')+':'+
+    String(now.getSeconds()).padStart(2,'0');
+
+  // Night mode: 21h - 6h
+  const h = now.getHours();
+  document.body.classList.toggle('night', h >= 21 || h < 6);
+
+  // Trip duration
+  if (tracking && tripStart) {
+    const elapsed = Math.floor((Date.now() - tripStart) / 1000);
+    const m = Math.floor(elapsed/60), s = elapsed%60;
+    document.getElementById('tripTime').textContent = m+':'+String(s).padStart(2,'0');
+  }
 }
 setInterval(updateClock, 1000);
 updateClock();
+
+// ============================================================
+// BATTERY
+// ============================================================
+async function initBattery() {
+  if (!navigator.getBattery) return;
+  try {
+    const bat = await navigator.getBattery();
+    function updateBat() {
+      const pct = Math.round(bat.level * 100);
+      const charging = bat.charging;
+      let icon = charging ? '⚡' : pct > 60 ? '🔋' : pct > 20 ? '🪫' : '❗';
+      document.getElementById('batteryDisplay').textContent = icon + ' ' + pct + '%';
+    }
+    updateBat();
+    bat.addEventListener('levelchange', updateBat);
+    bat.addEventListener('chargingchange', updateBat);
+  } catch(e) {}
+}
+initBattery();
+
+// ============================================================
+// WAKE LOCK — écran toujours allumé
+// ============================================================
+async function requestWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+  try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+}
+async function releaseWakeLock() {
+  if (wakeLock) { await wakeLock.release(); wakeLock = null; }
+}
+document.addEventListener('visibilitychange', async () => {
+  if (tracking && document.visibilityState === 'visible') requestWakeLock();
+});
 
 // ============================================================
 // AUDIO
@@ -374,17 +480,57 @@ function beep(freq=880, duration=200, vol=0.4) {
   osc.start(); osc.stop(audioCtx.currentTime + duration/1000);
 }
 
-function startBeeping() {
-  if (beepInterval) return;
-  beepInterval = setInterval(() => {
-    const excess = currentSpeed - activeLimit();
-    if (excess > 20) { beep(1100,150,0.5); setTimeout(()=>beep(1100,150,0.5),200); }
-    else if (excess > 10) beep(880,200,0.4);
-    else beep(660,300,0.3);
-  }, 800);
+// ============================================================
+// VOICE ALERTS
+// ============================================================
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'fr-FR';
+  utt.rate = 1.0;
+  utt.volume = 1.0;
+  utt.pitch = 1.0;
+  window.speechSynthesis.speak(utt);
 }
 
-function stopBeeping() { clearInterval(beepInterval); beepInterval = null; }
+function handleAlerts() {
+  if (!tracking) return;
+  const limit = activeLimit();
+  const excess = currentSpeed - limit;
+  const now = Date.now();
+
+  // Alert at 105 km/h — special warning
+  if (currentSpeed >= 105 && now - lastVoiceAlert > 8000) {
+    speak('Attention ! Vous roulez à ' + currentSpeed + ' kilomètres heure. Vitesse excessive !');
+    lastVoiceAlert = now;
+    tripAlertCount++;
+    document.getElementById('tripAlerts').textContent = tripAlertCount;
+    return;
+  }
+
+  if (excess > 0 && now - lastVoiceAlert > 10000) {
+    let msg = '';
+    if (excess >= 30) {
+      msg = 'Danger ! Réduisez immédiatement votre vitesse. Limite ' + limit + ' kilomètres heure.';
+    } else if (excess >= 15) {
+      msg = 'Attention ! Vitesse dépassée. Limite ' + limit + ' kilomètres heure.';
+    } else {
+      msg = 'Vitesse dépassée. Limite ' + limit + ' kilomètres heure.';
+    }
+    speak(msg);
+    lastVoiceAlert = now;
+    if (!isOver) { tripAlertCount++; document.getElementById('tripAlerts').textContent = tripAlertCount; }
+  }
+
+  // Beep pattern
+  if (excess > 0 && now - lastBeepAlert > 800) {
+    lastBeepAlert = now;
+    if (excess >= 30) { beep(1200,120,0.5); setTimeout(()=>beep(1200,120,0.5),180); setTimeout(()=>beep(1200,120,0.5),360); }
+    else if (excess >= 15) { beep(1000,160,0.45); setTimeout(()=>beep(1000,160,0.45),220); }
+    else { beep(750,220,0.35); }
+  }
+}
 
 // ============================================================
 // LIMITS
@@ -411,21 +557,21 @@ function confirmManual() {
 }
 
 // ============================================================
-// OSM
+// OSM SPEED LIMIT
 // ============================================================
 async function fetchOsmLimit(lat, lon) {
   const now = Date.now();
   if (now - lastOsmFetch < 15000) return;
   if (lastLat !== null && Math.hypot(lat-lastLat, lon-lastLon) < 0.0003) return;
   lastOsmFetch = now; lastLat = lat; lastLon = lon;
-  setOsmStatus('loading', 'Recherche...');
+  setOsmStatus('loading','Recherche...');
   try {
     const q = `[out:json][timeout:8];way(around:30,${lat},${lon})[highway][maxspeed];out tags 1;`;
     const res = await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
     const data = await res.json();
     if (data.elements?.length > 0) {
       const parsed = parseMaxspeed(data.elements[0].tags.maxspeed);
-      if (parsed) { osmLimit=parsed; osmMode=true; setOsmStatus('ok',`OSM: ${parsed} km/h`); updateUI(); return; }
+      if (parsed) { osmLimit=parsed; osmMode=true; setOsmStatus('ok','OSM: '+parsed+' km/h'); updateUI(); return; }
     }
     setOsmStatus('','OSM: aucune limite'); osmMode=false;
   } catch { setOsmStatus('','OSM indispo'); osmMode=false; }
@@ -446,100 +592,113 @@ function setOsmStatus(state, msg) {
 }
 
 // ============================================================
+// STREET NAME
+// ============================================================
+async function fetchStreetName(lat, lon) {
+  const now = Date.now();
+  if (now - lastStreetFetch < 20000) return;
+  if (Math.hypot(lat-(prevLat||lat), lon-(prevLon||lon)) < 0.0005) return;
+  lastStreetFetch = now;
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=17`);
+    const data = await res.json();
+    const road = data.address?.road || data.address?.pedestrian || data.address?.path || '';
+    const city = data.address?.city || data.address?.town || data.address?.village || '';
+    const name = road ? (road + (city ? ', ' + city : '')) : (city || 'Position inconnue');
+    document.getElementById('streetName').textContent = name;
+  } catch {
+    document.getElementById('streetName').textContent = 'Rue inconnue';
+  }
+}
+
+// ============================================================
 // WEATHER
 // ============================================================
 async function fetchWeather(lat, lon) {
   const now = Date.now();
-  if (now - lastWeatherFetch < 300000) return; // toutes les 5 min
+  if (now - lastWeatherFetch < 300000) return;
   lastWeatherFetch = now;
-
-  if (WEATHER_API_KEY === 'YOUR_KEY') {
-    document.getElementById('weatherTemp').textContent = '-- °C';
-    document.getElementById('weatherDesc').textContent = 'Clé API manquante';
-    return;
-  }
-
   try {
     const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric&lang=fr`);
     const data = await res.json();
-    const temp = Math.round(data.main.temp);
-    const desc = data.weather[0].description;
-    const icon = getWeatherIcon(data.weather[0].id);
-    document.getElementById('weatherIcon').textContent = icon;
-    document.getElementById('weatherTemp').textContent = temp + ' °C';
-    document.getElementById('weatherDesc').textContent = desc;
+    if (data.cod !== 200) { document.getElementById('weatherDesc').textContent='Clé en activation'; return; }
+    document.getElementById('weatherIcon').textContent = getWeatherIcon(data.weather[0].id);
+    document.getElementById('weatherTemp').textContent = Math.round(data.main.temp) + ' °C';
+    document.getElementById('weatherDesc').textContent = data.weather[0].description + ' · ' + Math.round(data.wind.speed*3.6) + ' km/h vent';
   } catch {
     document.getElementById('weatherDesc').textContent = 'Indisponible';
   }
 }
 
 function getWeatherIcon(id) {
-  if (id >= 200 && id < 300) return '⛈️';
-  if (id >= 300 && id < 400) return '🌦️';
-  if (id >= 500 && id < 600) return '🌧️';
-  if (id >= 600 && id < 700) return '❄️';
-  if (id >= 700 && id < 800) return '🌫️';
-  if (id === 800) return '☀️';
-  if (id === 801) return '🌤️';
-  if (id <= 804) return '☁️';
+  if (id>=200&&id<300) return '⛈️';
+  if (id>=300&&id<400) return '🌦️';
+  if (id>=500&&id<600) return '🌧️';
+  if (id>=600&&id<700) return '❄️';
+  if (id>=700&&id<800) return '🌫️';
+  if (id===800) return '☀️';
+  if (id===801) return '🌤️';
+  if (id<=804) return '☁️';
   return '🌡️';
 }
 
 // ============================================================
-// TRAFFIC (estimation basée sur heure + vitesse)
+// TRAFFIC
 // ============================================================
 function estimateTraffic() {
   const now = Date.now();
   if (now - lastTrafficFetch < 60000) return;
   lastTrafficFetch = now;
-
   const hour = new Date().getHours();
-  const day = new Date().getDay(); // 0=dim, 6=sam
-  const isWeekend = day === 0 || day === 6;
-  const isRushHour = !isWeekend && ((hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 19));
-  const isMorning = hour >= 6 && hour <= 11;
-  const isNight = hour >= 22 || hour <= 5;
-
-  let icon, status, sub;
-  if (isNight) { icon='🌙'; status='Fluide'; sub='Trafic nuit'; }
-  else if (isRushHour) { icon='🚨'; status='Chargé'; sub='Heure de pointe'; }
-  else if (isWeekend && isMorning) { icon='⚠️'; status='Modéré'; sub='Weekend matin'; }
-  else { icon='✅'; status='Fluide'; sub='Trafic normal'; }
-
-  document.getElementById('trafficIcon').textContent = icon;
-  document.getElementById('trafficStatus').textContent = status;
-  document.getElementById('trafficSub').textContent = sub;
+  const day = new Date().getDay();
+  const isWeekend = day===0||day===6;
+  const isRush = !isWeekend&&((hour>=7&&hour<=9)||(hour>=17&&hour<=19));
+  const isNight = hour>=22||hour<=5;
+  let icon,status,sub;
+  if (isNight){icon='🌙';status='Fluide';sub='Trafic nuit';}
+  else if (isRush){icon='🚨';status='Chargé';sub='Heure de pointe';}
+  else if (isWeekend&&hour>=10&&hour<=14){icon='⚠️';status='Modéré';sub='Weekend midi';}
+  else{icon='✅';status='Fluide';sub='Trafic normal';}
+  document.getElementById('trafficIcon').textContent=icon;
+  document.getElementById('trafficStatus').textContent=status;
+  document.getElementById('trafficSub').textContent=sub;
 }
 
 // ============================================================
 // COMPASS
 // ============================================================
 function initCompass() {
-  if (window.DeviceOrientationEvent) {
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission().then(p => {
-        if (p === 'granted') window.addEventListener('deviceorientation', onOrientation);
-      });
-    } else {
-      window.addEventListener('deviceorientation', onOrientation);
-    }
+  if (!window.DeviceOrientationEvent) return;
+  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission().then(p=>{
+      if (p==='granted') window.addEventListener('deviceorientation',onOrientation);
+    });
+  } else {
+    window.addEventListener('deviceorientation',onOrientation);
   }
 }
 
 function onOrientation(e) {
-  let heading = e.webkitCompassHeading || (e.alpha ? (360 - e.alpha) : null);
-  if (heading === null) return;
-  heading = Math.round(heading);
-  currentHeading = heading;
+  let heading = e.webkitCompassHeading || (e.alpha ? 360-e.alpha : null);
+  if (heading===null) return;
+  heading = Math.round(heading); currentHeading = heading;
   document.getElementById('compassNeedle').style.transform =
     `translateX(-50%) translateY(-100%) rotate(${heading}deg)`;
-  document.getElementById('compassDeg').textContent = heading + '°';
+  document.getElementById('compassDeg').textContent = heading+'°';
   document.getElementById('compassDir').textContent = getDirection(heading);
 }
 
 function getDirection(deg) {
-  const dirs = ['N','NE','E','SE','S','SO','O','NO'];
-  return dirs[Math.round(deg/45) % 8];
+  return ['N','NE','E','SE','S','SO','O','NO'][Math.round(deg/45)%8];
+}
+
+// ============================================================
+// DISTANCE
+// ============================================================
+function calcDistance(lat1,lon1,lat2,lon2) {
+  const R=6371, dLat=(lat2-lat1)*Math.PI/180, dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
 // ============================================================
@@ -548,47 +707,72 @@ function getDirection(deg) {
 function toggleTracking() { tracking ? stopTracking() : startTracking(); }
 
 function startTracking() {
-  if (!navigator.geolocation) { alert('GPS non disponible.'); return; }
-  initAudio(); initCompass(); tracking = true; maxSpeed = 0;
-  document.getElementById('startBtn').textContent = '■ ARRÊTER';
+  if (!navigator.geolocation){alert('GPS non disponible.');return;}
+  initAudio(); initCompass(); requestWakeLock();
+  tracking=true; tripStart=Date.now(); tripDist=0; tripAlertCount=0; speedSamples=[]; maxSpeed=0;
+  document.getElementById('startBtn').textContent='■ ARRÊTER';
   document.getElementById('startBtn').classList.add('stop');
-  document.getElementById('statusDot').className = 'status-dot active';
+  document.getElementById('statusDot').className='status-dot active';
   setOsmStatus('loading','GPS en cours...');
-  watchId = navigator.geolocation.watchPosition(onPosition, onError, {
-    enableHighAccuracy:true, maximumAge:1000, timeout:10000
+  watchId=navigator.geolocation.watchPosition(onPosition,onError,{
+    enableHighAccuracy:true,maximumAge:1000,timeout:10000
   });
+  speak('SpeedGuard activé. Bonne route !');
 }
 
 function stopTracking() {
-  tracking = false; navigator.geolocation.clearWatch(watchId); watchId = null;
-  stopBeeping(); currentSpeed = 0; osmMode = false; osmLimit = null; maxSpeed = 0;
-  document.getElementById('startBtn').textContent = '▶ DÉMARRER';
+  tracking=false; navigator.geolocation.clearWatch(watchId); watchId=null;
+  window.speechSynthesis.cancel(); releaseWakeLock();
+  currentSpeed=0; osmMode=false; osmLimit=null; maxSpeed=0; isOver=false;
+  document.getElementById('startBtn').textContent='▶ DÉMARRER';
   document.getElementById('startBtn').classList.remove('stop');
-  document.getElementById('statusDot').className = 'status-dot';
-  setOsmStatus('','OSM inactif'); updateUI();
+  document.getElementById('statusDot').className='status-dot';
+  setOsmStatus('','OSM inactif');
+  const avg = speedSamples.length>0 ? Math.round(speedSamples.reduce((a,b)=>a+b,0)/speedSamples.length) : 0;
+  document.getElementById('avgSpeed').textContent=avg;
+  speak('SpeedGuard désactivé. Trajet terminé.');
+  updateUI();
 }
 
 function onPosition(pos) {
-  currentSpeed = Math.max(0, Math.round((pos.coords.speed||0)*3.6));
-  if (currentSpeed > maxSpeed) maxSpeed = currentSpeed;
-  const pct = Math.max(0, Math.min(100, (100-(pos.coords.accuracy||999))/95*100));
-  document.getElementById('accuracyFill').style.width = pct+'%';
-  const lat = pos.coords.latitude, lon = pos.coords.longitude;
+  const lat=pos.coords.latitude, lon=pos.coords.longitude;
+  currentSpeed=Math.max(0,Math.round((pos.coords.speed||0)*3.6));
 
-  // Heading from GPS if no compass
-  if (pos.coords.heading && currentHeading === null) {
-    const h = Math.round(pos.coords.heading);
-    document.getElementById('compassNeedle').style.transform =
-      `translateX(-50%) translateY(-100%) rotate(${h}deg)`;
-    document.getElementById('compassDeg').textContent = h+'°';
-    document.getElementById('compassDir').textContent = getDirection(h);
+  // Distance
+  if (prevLat!==null) {
+    const d=calcDistance(prevLat,prevLon,lat,lon);
+    if (d<0.5) tripDist+=d;
+    document.getElementById('tripDist').textContent=tripDist.toFixed(1);
+  }
+  prevLat=lat; prevLon=lon;
+
+  // Speed samples for average
+  if (currentSpeed>2) { speedSamples.push(currentSpeed); if (speedSamples.length>200) speedSamples.shift(); }
+  const avg=speedSamples.length>0?Math.round(speedSamples.reduce((a,b)=>a+b,0)/speedSamples.length):0;
+  document.getElementById('avgSpeed').textContent=avg;
+
+  if (currentSpeed>maxSpeed) maxSpeed=currentSpeed;
+
+  // GPS heading fallback
+  if (pos.coords.heading!==null && pos.coords.heading!==undefined && currentHeading===null && currentSpeed>5) {
+    const h=Math.round(pos.coords.heading);
+    document.getElementById('compassNeedle').style.transform=`translateX(-50%) translateY(-100%) rotate(${h}deg)`;
+    document.getElementById('compassDeg').textContent=h+'°';
+    document.getElementById('compassDir').textContent=getDirection(h);
   }
 
-  if (currentSpeed > 5) {
-    fetchOsmLimit(lat, lon);
-    fetchWeather(lat, lon);
+  // Accuracy
+  const pct=Math.max(0,Math.min(100,(100-(pos.coords.accuracy||999))/95*100));
+  document.getElementById('accuracyFill').style.width=pct+'%';
+
+  if (currentSpeed>5) {
+    fetchOsmLimit(lat,lon);
+    fetchWeather(lat,lon);
     estimateTraffic();
+    fetchStreetName(lat,lon);
   }
+
+  handleAlerts();
   updateUI();
 }
 
@@ -598,29 +782,41 @@ function onError() { setOsmStatus('','Erreur GPS'); }
 // UI
 // ============================================================
 function updateUI() {
-  const limit = activeLimit();
-  const over = currentSpeed > limit;
-  const excess = Math.max(0, currentSpeed - limit);
+  const limit=activeLimit();
+  const over=currentSpeed>limit;
+  const is105=currentSpeed>=105&&!over;
+  const excess=Math.max(0,currentSpeed-limit);
 
-  const sv = document.getElementById('speedValue');
-  sv.textContent = currentSpeed;
-  sv.className = 'speed-value'+(over?' over':'');
-  document.getElementById('speedCard').className = 'speed-card'+(over?' over':'');
+  const sv=document.getElementById('speedValue');
+  sv.textContent=currentSpeed;
+  sv.className='speed-value'+(over?' over':is105?' warn105':'');
+
+  document.getElementById('speedCard').className='speed-card'+(over?' over':'');
 
   if (tracking) {
-    document.getElementById('statusDot').className = 'status-dot '+(over?'danger':'active');
+    document.getElementById('statusDot').className='status-dot '+(over?'danger':'active');
   }
 
-  document.getElementById('limitBadge').textContent = limit;
-  document.getElementById('maxSpeed').textContent = maxSpeed;
+  document.getElementById('limitBadge').textContent=limit;
+  document.getElementById('maxSpeed').textContent=maxSpeed;
 
-  const ex = document.getElementById('excessValue');
-  ex.textContent = excess;
-  ex.style.color = excess>20?'var(--danger)':excess>0?'var(--warn)':'var(--muted)';
+  const ex=document.getElementById('excessValue');
+  ex.textContent=excess;
+  ex.style.color=excess>20?'var(--danger)':excess>0?'var(--warn)':'var(--muted)';
 
-  const banner = document.getElementById('alertBanner');
-  if (over && tracking) { banner.classList.add('visible'); startBeeping(); }
-  else { banner.classList.remove('visible'); stopBeeping(); }
+  const banner=document.getElementById('alertBanner');
+  if (over&&tracking){
+    banner.textContent='⚠ VITESSE DÉPASSÉE — '+excess+' km/h EN EXCÈS';
+    banner.classList.add('visible');
+    isOver=true;
+  } else if (currentSpeed>=105&&tracking){
+    banner.textContent='⚠ ATTENTION — 105 km/h DÉPASSÉS';
+    banner.classList.add('visible');
+    isOver=false;
+  } else {
+    banner.classList.remove('visible');
+    isOver=false;
+  }
 }
 
 updateUI();
