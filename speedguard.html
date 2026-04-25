@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a0f">
+<title>SpeedGuard</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ok: #00e5a0;
+    --warn: #ffb300;
+    --danger: #ff2d55;
+    --bg: #0a0a0f;
+    --panel: #12121a;
+    --border: #1e1e2e;
+    --text: #e0e0f0;
+    --muted: #555570;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%; width: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0;
+    animation: gridMove 20s linear infinite;
+  }
+  @keyframes gridMove { to { transform: translateY(40px); } }
+
+  .app {
+    position: relative; z-index: 1;
+    height: 100%; display: flex; flex-direction: column;
+    padding: 10px 14px; gap: 8px;
+    max-width: 480px; margin: 0 auto;
+  }
+
+  /* HEADER */
+  .header { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .logo {
+    font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 900;
+    letter-spacing: 3px; color: var(--ok); text-shadow: 0 0 16px rgba(0,229,160,0.5);
+  }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .osm-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+  .osm-dot.ok { background: var(--ok); }
+  .osm-dot.loading { background: var(--warn); animation: pulse 1s infinite; }
+  .osm-text { font-size: 9px; color: var(--muted); max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); transition: all 0.4s; }
+  .status-dot.active { background: var(--ok); box-shadow: 0 0 10px var(--ok); animation: pulse 2s infinite; }
+  .status-dot.danger { background: var(--danger); box-shadow: 0 0 10px var(--danger); animation: pulseFast 0.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes pulseFast { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* ALERT */
+  .alert-banner {
+    flex-shrink: 0;
+    background: rgba(255,45,85,0.15); border: 1px solid rgba(255,45,85,0.5);
+    border-radius: 10px; padding: 0 12px; text-align: center;
+    font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700;
+    color: var(--danger); letter-spacing: 2px;
+    max-height: 0; overflow: hidden; opacity: 0;
+    transition: max-height 0.3s, opacity 0.3s, padding 0.3s;
+  }
+  .alert-banner.visible {
+    max-height: 40px; opacity: 1; padding: 7px 12px;
+    animation: alertPulse 0.8s infinite;
+  }
+  @keyframes alertPulse {
+    0%,100%{background:rgba(255,45,85,0.15)} 50%{background:rgba(255,45,85,0.3)}
+  }
+
+  /* SPEED CARD */
+  .speed-card {
+    flex-shrink: 0;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 20px; padding: 14px 12px 10px; text-align: center;
+    position: relative; overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .speed-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,229,160,0.06) 0%, transparent 70%);
+    pointer-events: none; transition: background 0.3s;
+  }
+  .speed-card.over::before { background: radial-gradient(ellipse at 50% 0%, rgba(255,45,85,0.12) 0%, transparent 70%); }
+  .speed-card.over { border-color: var(--danger); box-shadow: 0 0 30px rgba(255,45,85,0.15); }
+  .speed-label { font-size: 9px; letter-spacing: 4px; text-transform: uppercase; color: var(--muted); margin-bottom: 0; }
+  .speed-value {
+    font-family: 'Orbitron', monospace; font-size: 78px; font-weight: 900;
+    line-height: 1; color: var(--ok); text-shadow: 0 0 30px rgba(0,229,160,0.4);
+    transition: color 0.3s, text-shadow 0.3s; letter-spacing: -2px;
+  }
+  .speed-value.over { color: var(--danger); text-shadow: 0 0 30px rgba(255,45,85,0.5); }
+  .speed-unit { font-family: 'Orbitron', monospace; font-size: 10px; color: var(--muted); letter-spacing: 2px; }
+  .accuracy-bar { height: 2px; background: var(--border); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .accuracy-fill { height: 100%; background: var(--ok); border-radius: 2px; transition: width 0.5s; width: 0%; }
+
+  /* INFO ROW */
+  .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-shrink: 0; }
+  .info-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 8px; text-align: center;
+  }
+  .info-card-label { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .info-card-value { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 700; color: var(--text); }
+  .info-card-unit { font-size: 8px; color: var(--muted); margin-top: 1px; letter-spacing: 1px; }
+  .limit-badge {
+    display: inline-block; width: 38px; height: 38px;
+    border-radius: 50%; border: 2px solid var(--danger);
+    line-height: 34px; font-family: 'Orbitron', monospace;
+    font-size: 13px; font-weight: 900; color: var(--text);
+  }
+
+  /* LIMIT CARD */
+  .limit-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 8px 10px; flex-shrink: 0;
+  }
+  .limit-title { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .limit-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  .limit-btn {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 2px; font-family: 'Orbitron', monospace; font-size: 12px;
+    font-weight: 700; color: var(--muted); cursor: pointer; transition: all 0.2s; text-align: center;
+  }
+  .limit-btn.active { background: rgba(0,229,160,0.1); border-color: var(--ok); color: var(--ok); }
+  .limit-btn.manual-btn { font-size: 8px; letter-spacing: 1px; }
+  .manual-input-row { display: none; gap: 6px; margin-top: 6px; }
+  .manual-input-row.visible { display: flex; }
+  .manual-input {
+    flex: 1; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 10px; font-family: 'Orbitron', monospace;
+    font-size: 16px; font-weight: 700; color: var(--text); text-align: center; outline: none;
+  }
+  .manual-input:focus { border-color: var(--ok); }
+  .manual-confirm {
+    background: rgba(0,229,160,0.15); border: 1px solid var(--ok);
+    border-radius: 8px; padding: 7px 14px; font-family: 'Orbitron', monospace;
+    font-size: 11px; font-weight: 700; color: var(--ok); cursor: pointer;
+  }
+
+  /* START BUTTON */
+  .start-btn {
+    flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(0,229,160,0.15), rgba(0,229,160,0.05));
+    border: 1px solid var(--ok); border-radius: 14px; padding: 15px;
+    font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700;
+    letter-spacing: 3px; color: var(--ok); cursor: pointer; text-align: center;
+    box-shadow: 0 0 20px rgba(0,229,160,0.1); transition: all 0.2s;
+  }
+  .start-btn.stop {
+    background: linear-gradient(135deg, rgba(255,45,85,0.15), rgba(255,45,85,0.05));
+    border-color: var(--danger); color: var(--danger);
+    box-shadow: 0 0 20px rgba(255,45,85,0.1);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="logo">SPEEDGUARD</div>
+    <div class="header-right">
+      <div class="osm-dot" id="osmDot"></div>
+      <span class="osm-text" id="osmStatus">OSM inactif</span>
+      <div class="status-dot" id="statusDot"></div>
+    </div>
+  </div>
+
+  <div class="alert-banner" id="alertBanner">⚠ VITESSE DÉPASSÉE</div>
+
+  <div class="speed-card" id="speedCard">
+    <div class="speed-label">VITESSE ACTUELLE</div>
+    <div class="speed-value" id="speedValue">0</div>
+    <div class="speed-unit">km/h</div>
+    <div class="accuracy-bar"><div class="accuracy-fill" id="accuracyFill"></div></div>
+  </div>
+
+  <div class="info-row">
+    <div class="info-card">
+      <div class="info-card-label">LIMITE ROUTE</div>
+      <div class="limit-badge" id="limitBadge">—</div>
+      <div class="info-card-unit">km/h</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-label">EXCÈS</div>
+      <div class="info-card-value" id="excessValue" style="color:var(--muted)">0</div>
+      <div class="info-card-unit">km/h</div>
+    </div>
+  </div>
+
+  <div class="limit-card">
+    <div class="limit-title">LIMITE MANUELLE (si OSM échoue)</div>
+    <div class="limit-buttons">
+      <button class="limit-btn" onclick="setManualLimit(30,this)">30</button>
+      <button class="limit-btn active" onclick="setManualLimit(50,this)">50</button>
+      <button class="limit-btn" onclick="setManualLimit(80,this)">80</button>
+      <button class="limit-btn" onclick="setManualLimit(110,this)">110</button>
+      <button class="limit-btn" onclick="setManualLimit(130,this)">130</button>
+      <button class="limit-btn" onclick="setManualLimit(90,this)">90</button>
+      <button class="limit-btn" onclick="setManualLimit(70,this)">70</button>
+      <button class="limit-btn manual-btn" onclick="toggleManual()">AUTRE</button>
+    </div>
+    <div class="manual-input-row" id="manualRow">
+      <input class="manual-input" type="number" id="manualInput" placeholder="60" min="1" max="300">
+      <button class="manual-confirm" onclick="confirmManual()">OK</button>
+    </div>
+  </div>
+
+  <button class="start-btn" id="startBtn" onclick="toggleTracking()">▶ DÉMARRER</button>
+
+</div>
+
+<script>
+let tracking = false, watchId = null;
+let manualLimit = 50, osmLimit = null, currentSpeed = 0;
+let audioCtx = null, beepInterval = null;
+let lastOsmFetch = 0, lastLat = null, lastLon = null, osmMode = false;
+
+function initAudio() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function beep(freq=880, duration=200, vol=0.4) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.frequency.value = freq; osc.type = 'square';
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration/1000);
+  osc.start(); osc.stop(audioCtx.currentTime + duration/1000);
+}
+
+function startBeeping() {
+  if (beepInterval) return;
+  beepInterval = setInterval(() => {
+    const excess = currentSpeed - activeLimit();
+    if (excess > 20) { beep(1100,150,0.5); setTimeout(()=>beep(1100,150,0.5),200); }
+    else if (excess > 10) beep(880,200,0.4);
+    else beep(660,300,0.3);
+  }, 800);
+}
+
+function stopBeeping() { clearInterval(beepInterval); beepInterval = null; }
+
+function activeLimit() { return osmMode && osmLimit ? osmLimit : manualLimit; }
+
+function setManualLimit(v, btn) {
+  manualLimit = v;
+  document.querySelectorAll('.limit-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateUI();
+}
+
+function toggleManual() { document.getElementById('manualRow').classList.toggle('visible'); }
+
+function confirmManual() {
+  const val = parseInt(document.getElementById('manualInput').value);
+  if (val > 0 && val <= 300) {
+    manualLimit = val;
+    document.querySelectorAll('.limit-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('manualRow').classList.remove('visible');
+    updateUI();
+  }
+}
+
+async function fetchOsmLimit(lat, lon) {
+  const now = Date.now();
+  if (now - lastOsmFetch < 15000) return;
+  if (lastLat !== null && Math.hypot(lat-lastLat, lon-lastLon) < 0.0003) return;
+  lastOsmFetch = now; lastLat = lat; lastLon = lon;
+  setOsmStatus('loading', 'Recherche...');
+  try {
+    const q = `[out:json][timeout:8];way(around:30,${lat},${lon})[highway][maxspeed];out tags 1;`;
+    const res = await fetch('https://overpass-api.de/api/interpreter', {method:'POST', body:'data='+encodeURIComponent(q)});
+    const data = await res.json();
+    if (data.elements?.length > 0) {
+      const parsed = parseMaxspeed(data.elements[0].tags.maxspeed);
+      if (parsed) { osmLimit = parsed; osmMode = true; setOsmStatus('ok', `OSM: ${parsed} km/h`); updateUI(); return; }
+    }
+    setOsmStatus('', 'OSM: aucune limite'); osmMode = false;
+  } catch { setOsmStatus('', 'OSM indispo'); osmMode = false; }
+}
+
+function parseMaxspeed(raw) {
+  if (!raw) return null;
+  const n = parseInt(raw); if (!isNaN(n)) return n;
+  if (raw==='FR:urban') return 50; if (raw==='FR:rural') return 80;
+  if (raw==='FR:motorway') return 130; if (raw==='FR:expressway') return 110;
+  if (raw.includes('mph')) return Math.round(parseFloat(raw)*1.60934);
+  return null;
+}
+
+function setOsmStatus(state, msg) {
+  document.getElementById('osmDot').className = 'osm-dot'+(state?' '+state:'');
+  document.getElementById('osmStatus').textContent = msg;
+}
+
+function toggleTracking() { tracking ? stopTracking() : startTracking(); }
+
+function startTracking() {
+  if (!navigator.geolocation) { alert('GPS non disponible.'); return; }
+  initAudio(); tracking = true;
+  document.getElementById('startBtn').textContent = '■ ARRÊTER';
+  document.getElementById('startBtn').classList.add('stop');
+  document.getElementById('statusDot').className = 'status-dot active';
+  setOsmStatus('loading', 'GPS en cours...');
+  watchId = navigator.geolocation.watchPosition(onPosition, onError, {
+    enableHighAccuracy:true, maximumAge:1000, timeout:10000
+  });
+}
+
+function stopTracking() {
+  tracking = false; navigator.geolocation.clearWatch(watchId); watchId = null;
+  stopBeeping(); currentSpeed = 0; osmMode = false; osmLimit = null;
+  document.getElementById('startBtn').textContent = '▶ DÉMARRER';
+  document.getElementById('startBtn').classList.remove('stop');
+  document.getElementById('statusDot').className = 'status-dot';
+  setOsmStatus('', 'OSM inactif'); updateUI();
+}
+
+function onPosition(pos) {
+  currentSpeed = Math.max(0, Math.round((pos.coords.speed||0)*3.6));
+  const pct = Math.max(0, Math.min(100, (100-(pos.coords.accuracy||999))/95*100));
+  document.getElementById('accuracyFill').style.width = pct+'%';
+  if (currentSpeed > 5) fetchOsmLimit(pos.coords.latitude, pos.coords.longitude);
+  updateUI();
+}
+
+function onError() { setOsmStatus('', 'Erreur GPS'); }
+
+function updateUI() {
+  const limit = activeLimit();
+  const over = currentSpeed > limit;
+  const excess = Math.max(0, currentSpeed - limit);
+
+  const sv = document.getElementById('speedValue');
+  sv.textContent = currentSpeed;
+  sv.className = 'speed-value'+(over?' over':'');
+
+  document.getElementById('speedCard').className = 'speed-card'+(over?' over':'');
+
+  if (tracking) {
+    document.getElementById('statusDot').className = 'status-dot '+(over?'danger':'active');
+  }
+
+  document.getElementById('limitBadge').textContent = limit;
+
+  const ex = document.getElementById('excessValue');
+  ex.textContent = excess;
+  ex.style.color = excess>20?'var(--danger)':excess>0?'var(--warn)':'var(--muted)';
+
+  const banner = document.getElementById('alertBanner');
+  if (over && tracking) { banner.classList.add('visible'); startBeeping(); }
+  else { banner.classList.remove('visible'); stopBeeping(); }
+}
+
+updateUI();
+</script>
+</body>
+</html>
